@@ -9,12 +9,15 @@ public class CustomArrayList {
     private int numberDataInList = 0;
 
     /***
-     * Expand size list on one element
+     * Expand size list on one element in certain index
      */
-    private void grow(){
+    private void grow(int index){
         Object []objects = new Object[numberDataInList + 1];
-        for (int i = 0; i < numberDataInList; i++) {
-            objects[i] = listElement[i];
+        for (int i = 0, j = 0; i < numberDataInList + 1; i++) {
+            if (i != index) {
+                objects[i] = listElement[j];
+                j++;
+            }
         }
         listElement=objects;
         numberDataInList++;
@@ -22,7 +25,7 @@ public class CustomArrayList {
 
     /***
      * Add element via index
-     * Use for expand list and for replace value in list
+     *
      * @param index
      * @param element
      * @param <E>
@@ -31,15 +34,21 @@ public class CustomArrayList {
         if (index > numberDataInList || index < 0) {   // if index out of bounds list
             throw new IndexOutOfBoundsException();
         }
-        if (index == numberDataInList) {               // expand list if index more size list on one element
-            grow();
-            listElement[index] = element;
-        } else {
-            listElement[index] = element;              // usual replace value via index
-        }
+        grow(index);
+        listElement[index] = element;
     }
 
+    /***
+     * Add group of list elements in custom array list
+     * @param c
+     * @return
+     * @param <E>
+     */
     public <E> boolean addAll(Collection<? extends E> c) {
+        for (E element: c) {
+            grow(numberDataInList);
+            listElement[numberDataInList - 1] = element;
+        }
         return true;
     }
 
@@ -79,11 +88,54 @@ public class CustomArrayList {
         }
         return false;
     }
-    public Object remove(int index){
-        return new Object();
+
+    /***
+     * Shrink list on one element except element on index
+     * @param index
+     */
+    public void reduce(int index){
+        Object []object = new Object[numberDataInList - 1];
+        for (int i = 0, j = 0; i < numberDataInList; i++) {
+            if (i != index) {
+                object[j] = listElement[i];
+                j++;
+            }
+        }
+        listElement = object;
+        numberDataInList--;
     }
+
+    /***
+     * Remove element via index
+     * @param index
+     * @return
+     */
+    public Object remove(int index) {
+        if (index > numberDataInList || index < 0) {   // if index out of bounds list
+            throw new IndexOutOfBoundsException();
+        }
+        Object deleted = listElement[index];
+        reduce(index);
+        return deleted;
+    }
+
+    /***
+     * Remove element via value of list
+     * @param o
+     * @return
+     */
     public boolean remove(Object o){
-        return true;
+        boolean isFound = false;
+        int indexFound = 0;
+        for (int i = 0; i < numberDataInList; i++) {
+            if (listElement[i].equals(o)) {
+                indexFound = i;
+                isFound = true;
+            }
+        }
+        reduce(indexFound);
+
+        return isFound;
     }
     public <E> void sort(Comparator<? super E> c){
 
